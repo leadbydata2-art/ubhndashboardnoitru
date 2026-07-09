@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bảng điều khiển Bệnh viện</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; background: #024593;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .navbar { display: flex; gap: 8px; align-items: center; padding: 10px 16px;
+              background: #fff; border-bottom: 1px solid #e5e7eb; overflow-x: auto; flex-shrink: 0; }
+    .tab { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+           color: #4b5563; white-space: nowrap; cursor: pointer; border: none;
+           background: transparent; transition: background .15s, color .15s; }
+    .tab:hover { background: #f3f4f6; }
+    .tab.active { background: #024593; color: #fff; }
+    .frame-wrap { flex: 1; position: relative; }
+    .frame-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%;
+                         border: 0; display: none; }
+    .frame-wrap iframe.visible { display: block; }
+    .loader { position: absolute; inset: 0; display: none; align-items: center;
+              justify-content: center; color: #fff; font-size: 14px; background: #024593; }
+    .loader.show { display: flex; }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="nav"></nav>
+  <div class="frame-wrap" id="wrap">
+    <div class="loader" id="loader">Đang tải…</div>
+  </div>
+  <script>
+    const tabs = [
+      { label: "Trạng thái Giường bệnh - Người bệnh",  file: "trang-thai-giuong-benh.html" },
+      { label: "Theo dõi Hồ sơ, tờ điều trị & Y lệnh",  file: "theo-doi-ho-so-y-lenh.html" },
+      { label: "Báo cáo giao ban",                       file: "bao-cao-giao-ban.html" },
+      { label: "Tổng quan hoạt động nội trú",            file: "tong-quan-hoat-dong-noi-tru.html" },
+      { label: "Tổng quan điều trị đặc thù",             file: "tong-quan-dieu-tri-dac-thu.html" },
+      { label: "Báo cáo thống kê",                       file: "bao-cao-thong-ke.html" }
+    ];
+    const nav = document.getElementById('nav');
+    const wrap = document.getElementById('wrap');
+    const loader = document.getElementById('loader');
+    const btns = [], frames = [];
+
+    tabs.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.className = 'tab';
+      b.textContent = t.label;
+      b.onclick = () => show(i);
+      nav.appendChild(b);
+      btns.push(b);
+
+      const f = document.createElement('iframe');
+      f.title = t.label;
+      f.dataset.loaded = "0";
+      wrap.appendChild(f);
+      frames.push(f);
+    });
+
+    function show(i) {
+      const f = frames[i];
+      // tải lần đầu, các lần sau giữ nguyên (không tải lại)
+      if (f.dataset.loaded === "0") {
+        loader.classList.add('show');
+        f.addEventListener('load', () => loader.classList.remove('show'), { once: true });
+        f.src = tabs[i].file;
+        f.dataset.loaded = "1";
+      } else {
+        loader.classList.remove('show');
+      }
+      frames.forEach((fr, j) => fr.classList.toggle('visible', j === i));
+      btns.forEach((b, j) => b.classList.toggle('active', j === i));
+      location.hash = i;
+    }
+
+    const start = parseInt(location.hash.replace('#', ''), 10);
+    show(Number.isInteger(start) && start >= 0 && start < tabs.length ? start : 0);
+  </script>
+</body>
+</html>
+
